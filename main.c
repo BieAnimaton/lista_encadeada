@@ -11,7 +11,7 @@ int main()
         struct lista *prox
     };
     typedef struct lista Lista;
-    int tamanho;
+    int tamanho, repeticao;
 
 
 
@@ -28,17 +28,17 @@ int main()
 
 
     void inserir_inicio (Lista **lista, int valor) {
-        Lista* nova_lista;
+        Lista *novo_elemento;
 
-        nova_lista = (Lista*) malloc(sizeof(Lista));
-        nova_lista->dado = valor;
-		nova_lista->prox = NULL;
+        novo_elemento = (Lista*)malloc(sizeof(Lista));
+        novo_elemento->dado = valor;
+		novo_elemento->prox = NULL;
 
-        if (*lista == NULL ) {
-            *lista = nova_lista;
-        } else {
-            nova_lista->prox = *lista;
-            *lista = nova_lista;
+        if (*lista == NULL ) { //se a lista estiver vazia, elemento é o primeiro elemento da lista
+            *lista = novo_elemento;
+        } else { // se a lista NÃO estiver vazia, prox do elemento recebe lista e lista recebe elemento 
+            novo_elemento->prox = *lista;
+            *lista = novo_elemento;
         }
     }
 
@@ -46,20 +46,22 @@ int main()
 
 
 	void inserir_final (Lista **lista, int valor) {
-        Lista *lista_nova, *percorre;
+        Lista *novo_elemento, *percorre;
 
-        lista_nova = (Lista*) malloc(sizeof(Lista));
-        lista_nova->dado = valor;
-        lista_nova->prox = NULL;
+        novo_elemento = (Lista*)malloc(sizeof(Lista));
+        novo_elemento->dado = valor;
+        novo_elemento->prox = NULL;
 
 		if (*lista == NULL) {
-			*lista = lista_nova;
+			*lista = novo_elemento;
 		} else {
 			percorre = *lista;
+			
 			while (percorre->prox != NULL) {
 				percorre = percorre->prox;
 			}
-			percorre->prox = lista_nova;
+			
+			percorre->prox = novo_elemento;
 		}
     }
 
@@ -68,11 +70,14 @@ int main()
     int busca (Lista* lista, int valor)
     {
         Lista* nova_lista;
+        nova_lista = lista;
 
-        for (nova_lista =lista ; nova_lista != NULL; nova_lista = nova_lista->prox) {
+        while (nova_lista != NULL) {
             if  (nova_lista->dado == valor) {
                 printf("Valor %d encontrado no endereço %d\n", nova_lista->dado, nova_lista);
             }
+            
+            nova_lista = nova_lista->prox;
         }
 
         return NULL; /* não achou o elemento */
@@ -81,20 +86,26 @@ int main()
 
 
     int retira_dado (Lista *lista, int valor) {
-    	Lista *percorre;
-    	Lista *anterior;
+    	Lista *percorre, *anterior;
 
     	if (lista != NULL) {
-    		while (percorre->dado != valor) {
-    			anterior = percorre;
+    		while (percorre != NULL) {    				
+    			if (percorre->dado == valor) {
+    				anterior->prox = percorre->prox;
+					free(percorre);
+					return 0;
+				}
+				
+				anterior = percorre;
     			percorre = percorre->prox;
-			};
-
-			anterior->prox = percorre->prox;
-			free(percorre);
+			}
+			
+			return 101;
 		} else {
 			printf("Lista vazia!");
 		}
+		
+		return 0;
 	}
 
 
@@ -114,18 +125,17 @@ int main()
 
 
 	int retira_final (Lista **lista) {
-    	Lista *aux1, *percorre;
+    	Lista *anterior, *percorre;
 
     	percorre = *lista;
 
     	if (*lista != NULL) {
-			while (percorre != NULL) {
-			    aux1 = percorre->prox;
+			while (percorre->prox != NULL) {
+			    anterior = percorre;
                 percorre = percorre->prox;
 			}
-
-			//aux1->prox = percorre;
-			free(percorre);
+			
+			anterior->prox = percorre->prox;
 		} else {
 			printf("Lista vazia!");
 		}
@@ -139,6 +149,7 @@ int main()
 
         if (lista != NULL) {
             percorre = lista;
+            
             while (percorre != NULL) {
                 (*tam)++;
                 percorre = percorre->prox;
@@ -186,8 +197,69 @@ int main()
 
 
 
-    int inverter_lista (Lista *lista) {
+	int inverter_com_o_de_tras (Lista *lista) {
 
+	}
+
+
+
+    int inverter_lista (Lista **lista) {
+    	Lista *percorre,*aux_1,*aux_2,*aux_3;
+    	
+	    percorre = *lista;
+	    
+	    if(percorre==NULL)
+	    {
+	        return 1;
+	    }
+	    else if(percorre->prox==NULL)
+	    {
+	        return 0;
+	    }
+	    else
+	    {
+	        aux_1       = *lista;          /*O ponteiro aux_a aponta para o primeiro nó, uma vez que o ponteiro "ini" passará a apontar para o último. */
+	        aux_2       = aux_1->prox;     /*O ponteiro aux_p passa a apontar para o segundo nó da lista.*/
+	        aux_3       = aux_2->prox;     /*O ponteiro aux_v passa a apontar para o terceiro nó da lista.*/
+	        aux_1->prox = NULL;            /*O primeiro nó da lista passa a ser o último, apontando para NULL.*/
+	        aux_2->prox = aux_1;           /*O segundo nó da lista passa a apontar para o primeiro, começando a inversão da lista.*/
+	                                       /*Início - Processo de inversão.*/
+	        while(aux_3!=NULL)
+	        {
+	            aux_1 = aux_2;              /*O ponteiro aux_a pega o valor do nó a sua frente na lista.*/
+	            aux_2 = aux_3;              /*O ponteiro aux_p pega o valor do nó a sua frente na lista.*/
+	            aux_3 = aux_3->prox;        /*O ponteiro aux_v pega o valor do nó a sua frente na lista.*/
+	            aux_2->prox = aux_1;         /*O nó para o qual aux_p está apontado passa a apontar para o nó anterior a ele na lista.*/
+	        }
+	        
+	        *lista = aux_2;
+	    }
+	    
+		return 0;
+	}
+	
+	int repete_dado (Lista *lista, int valor, int *resp) {
+		int cont = 0;
+		
+		if (lista == NULL)
+		{
+	        *resp = 0;
+	        return 1;
+		}
+		
+	    while (lista != NULL) {
+	       if (lista->dado == valor)
+	          cont++;
+	          
+	       lista = lista->prox;
+	    }
+	    
+	    if (cont > 1)
+	       *resp = 1;
+	    else
+	       *resp = 0;
+	       
+		return 0;
 	}
 
 
@@ -233,10 +305,10 @@ int main()
 			printf("Lista vazia!");
 		}
 
-        do {
+        while (lista != NULL) {
         	printf("%d ", lista->dado);
             lista = lista->prox;
-		} while (lista != NULL);
+		}
 		printf("\n");
     }
 
@@ -279,6 +351,14 @@ int main()
     inserir_final(&lista, 303);
     printf("\nInserindo dados no fim e apenas 291 no início:\n");
     imprimir_lista(lista);
+    
+    printf("\nQuantidade que o elemento 2 repete:\n");
+    repete_dado(lista, 2, &repeticao);
+    printf("%d\n", repeticao);
+    
+    printf("\nInvertendo a lista:\n");
+    inverter_lista(&lista);
+    imprimir_lista(lista);
 
     printf("\nBuscando dado:\n");
     busca(lista, 303);
@@ -294,7 +374,7 @@ int main()
 	remover_penultimo(&lista);
     imprimir_lista(lista);
 
-    printf("\nRetirando dado x:\n");
+    printf("\nRetirando dado 78:\n");
     retira_dado(&lista, 78);
     imprimir_lista(lista);
 
@@ -302,10 +382,9 @@ int main()
 	retira_inicio(&lista);
 	imprimir_lista(lista);
 
-    //esta parte ainda n funciona
-	//printf("\nRetirando dado do final:\n");
-	//retira_final(&lista);
-    //imprimir_lista(lista);
+	printf("\nRetirando dado do final:\n");
+	retira_final(&lista);
+    imprimir_lista(lista);
 
     return 0;
 }
